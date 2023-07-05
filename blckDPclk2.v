@@ -9,15 +9,14 @@ module blockDPclk2 (
     q2
 );
 	parameter WIDTH = 32;
-    parameter WIDTH1 = 4;
 	input wire clk;
 	input wire reset;
-	input wire [WIDTH - 1:0] d0;
-	input wire [WIDTH - 1:0] d1;
-    input wire [WIDTH1 - 1:0] d2;
-	output reg [WIDTH - 1:0] q0;
-	output reg [WIDTH - 1:0] q1;
-	output reg [WIDTH1 - 1:0] q2;
+	input wire [WIDTH - 1:0] d0; // 32 bits
+	input wire [WIDTH - 1:0] d1; // 32 bits
+    input wire [WIDTH - 29:0] d2; // 4 bits
+	output reg [WIDTH - 1:0] q0; // 32 bits
+	output reg [WIDTH - 1:0] q1; // 32 bits
+	output reg [WIDTH - 29:0] q2; // 4 bits
 	always @(posedge clk or posedge reset)
 		if (reset) begin
 			q0 <= 0;
