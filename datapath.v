@@ -29,6 +29,7 @@ module datapath (
 	input wire [31:0] InstrF;
 	output wire [31:0] ALUResultM;
 	output wire [31:0] WriteDataM;
+	output wire [31:12] InstrControl;
 	input wire [31:0] ReadDataM;
 	wire [31:0] PCNext;
 	wire [31:0] PCPlus4F;
@@ -39,6 +40,7 @@ module datapath (
 	wire [31:0] ResultW;
 	wire [3:0] RA1D;
 	wire [3:0] RA2D;
+	wire [31:0] InstrD;
 
 	wire [31:0] RD1D;
 	wire [31:0] RD2D;
@@ -70,7 +72,7 @@ module datapath (
 	adder #(32) pcadd1(
 		.a(PCF),
 		.b(2'b100),
-		.y(PCPlus4)
+		.y(PCPlus4F)
 	);
 	// problemas con el PCPlus8
 	
@@ -80,7 +82,7 @@ module datapath (
 		.d(InstrF),
 		.q(InstrD)
 	);
-
+	assign InstrControl = InstrD[31:12];
 	// PARTE DEL FETCH
 
 	mux2 #(4) ra1mux(
@@ -111,7 +113,7 @@ module datapath (
 	extend ext(
 		.Instr(InstrD[23:0]),
 		.ImmSrc(ImmSrcD),
-		.ExtImm(ExtImm)
+		.ExtImm(ExtImmD)
 	);
 
 
@@ -130,12 +132,12 @@ module datapath (
 
 	// PARTE DEL EXECUTE
 
-	mux2 #(4) SrcBEALU(
+	mux2 #(32) SrcBEALU(
 		.d0(WriteDataE),
 		.d1(ExtImmE),
 		.s(ALUSrcE),
 		.y(SrcBE)
-	)
+	);
 
 	alu aluBlock(
 		.SrcA(SrcAE),
@@ -160,7 +162,7 @@ module datapath (
 
 	blockDPclk2 WriteBackCLK(
 		.clk(clk),
-		.reset(),
+		.reset(reset),
 		.d0(ReadDataM),
 		.d1(ALUResultM),
 		.d2(WA3M),
@@ -171,7 +173,7 @@ module datapath (
 
 	// PARTE DEL WRITE BACK
 
-	mux2 #(4) resmux(
+	mux2 #(32) resmux(
 		.d0(ALUResultW),
 		.d1(ReadDataW),
 		.s(MemtoRegW),
