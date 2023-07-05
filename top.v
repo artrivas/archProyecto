@@ -2,30 +2,50 @@ module top (
 	clk,
 	reset,
 	WriteData,
-	Adr,
-	MemWrite
+	DataAdr,
+	MemWrite,
+
+	PCSrc,
+	MemtoReg, //Changed
+	RegWrite, //Changed
+	ALUSrc, //Changed
+	RegSrc, //Changed
+	ImmSrc,// Changed
+	ALUControl//Changed
 );
 	input wire clk;
 	input wire reset;
 	output wire [31:0] WriteData;
-	output wire [31:0] Adr;
-	output wire MemWrite;
+	input wire [31:0] DataAdr;
+	input wire MemWrite; //Changed
+	input wire PCSrc; //Changed
+	input wire MemtoReg; //Changed
+	input wire RegWrite; //Changed
+	input wire ALUSrc; //Changed
+	input wire [1:0] RegSrc; //Changed
+	input wire [1:0] ImmSrc;// Changed
+	input wire [1:0] ALUControl;//Changed
 	wire [31:0] PC;
 	wire [31:0] Instr;
 	wire [31:0] ReadData;
-	// instantiate processor and shared memory
 	arm arm(
 		.clk(clk),
 		.reset(reset),
+		.PC(PC),
+		.Instr(Instr),
 		.MemWrite(MemWrite),
-		.Adr(Adr),
+		.ALUResult(DataAdr),
 		.WriteData(WriteData),
 		.ReadData(ReadData)
 	);
-	mem mem(
+	imem imem(
+		.a(PC),
+		.rd(Instr)
+	);
+	dmem dmem(
 		.clk(clk),
 		.we(MemWrite),
-		.a(Adr),
+		.a(DataAdr),
 		.wd(WriteData),
 		.rd(ReadData)
 	);

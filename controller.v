@@ -18,7 +18,7 @@ module controller (
 	input wire [3:0] ALUFlags;
 	output wire PCSrcW;
 	output wire MemWriteM;
-	output wire MemtoRegW
+	output wire MemtoRegW;
 	output wire RegWriteW;
 	output wire [1:0] RegSrcD;
 	output wire [1:0] ALUSrcE;
@@ -85,34 +85,7 @@ module controller (
 		.ALUControl(ALUControl)
 	);
 
-	// PRIMER BLOQUE CLK
 
-	blockC1 #(1) #(2) #(4) CLKCondU(
-		.clk(clk),
-		.reset(reset),
-		.d0(PCSD),
-		.d1(RWD),
-		.d2(mRD),
-		.d3(mWD),
-		.d4(ALUCD),
-		.d5(BD),
-		.d6(ALUSD),
-		.d7(FWD),
-		.d8(Instr[31:28]),
-		.d9(FlagsNext),
-		.q0(PCSE),
-		.q1(RWE),
-		.q2(mRE),
-		.q3(mWE),
-		.q4(ALUControlE)
-		.q5(BE),
-		.q6(ALUSE),
-		.q7(FWE),
-		.q8(CondE),
-		.q9(FlagsE)
-	);
-
-	// bloque de conditional logic
 
 	condlogic cl(
 		.clk(clk),
