@@ -3,13 +3,14 @@ module mainfsm (
 	reset,
 	Op,
 	Funct,
-	Branch,
-	MemtoReg,
-	MemW,
-	ALUSrc,
-	ImmSrc,
+	IRWrite,
+	AdrSrc,
+	ALUSrcA,
+	ALUSrcB,
+	ResultSrc,
+	NextPC,
 	RegW,
-	RegSrc,
+	MemW,
 	Branch,
 	ALUOp
 );
@@ -17,13 +18,14 @@ module mainfsm (
 	input wire reset;
 	input wire [1:0] Op;
 	input wire [5:0] Funct;
-	output wire Branch;
-	output wire MemtoReg;
-	output wire MemW;
-	output wire ALUSrc;
-	output wire [1:0] ImmSrc;
+	output wire IRWrite;
+	output wire AdrSrc;
+	output wire [1:0] ALUSrcA;
+	output wire [1:0] ALUSrcB;
+	output wire [1:0] ResultSrc;
+	output wire NextPC;
 	output wire RegW;
-	output wire [1:0] RegSrc;
+	output wire MemW;
 	output wire Branch;
 	output wire ALUOp;
 	reg [3:0] state;
@@ -89,17 +91,17 @@ module mainfsm (
 	// state-dependent output logic
 	always @(*)
 		case (state)
-			FETCH: controls = 12'b000101001100;
-			DECODE: controls = 12'b000001001100;
-			EXECUTER: controls = 12'b000000000001;
-			EXECUTEI: controls = 12'b000000000011; 
-			ALUWB: controls = 12'b001000000000; 
-			MEMADR: controls = 12'b000000000010; 
-			MEMWRITE:controls = 12'b010010000000; 
-			MEMREAD: controls = 12'b000010000000; 
-			MEMWB: controls = 12'b001000100000; 
-			BRANCH: controls = 12'b100001010010;
-			default: controls = 12'bxxxxxxxxxxxx;
+			FETCH: controls = 13'b1000101001100;
+			DECODE: controls = 13'b0000001001100;
+			EXECUTER: controls = 13'b0000000000001;
+			EXECUTEI: controls = 13'b0000000000011; 
+			ALUWB: controls = 13'b0001000000000; 
+			MEMADR: controls = 13'b0000000000010; 
+			MEMWRITE:controls = 13'b0010010000000; 
+			MEMREAD: controls = 13'b0000010000000; 
+			MEMWB: controls = 13'b0001000100000; 
+			BRANCH: controls = 13'b0100001010010;
+			default: controls = 13'bxxxxxxxxxxxxx;
 		endcase
-	assign {Branch, MemtoReg, MemW, ALUSrc, ImmSrc, RegW, RegSrc, Branch, ALUSrcB, ALUOp} = controls;
+	assign {NextPC, Branch, MemW, RegW, IRWrite, AdrSrc, ResultSrc, ALUSrcA, ALUSrcB, ALUOp} = controls;
 endmodule

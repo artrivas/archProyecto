@@ -1,3 +1,5 @@
+`timescale 1ns/1ns
+
 module testbench;
 	reg clk;
 	reg reset;
@@ -5,11 +7,11 @@ module testbench;
 	wire [31:0] DataAdr;
 	wire MemWrite;
 	top dut(
-		.clk(clk),
-		.reset(reset),
-		.WriteData(WriteData),
-		.Adr(DataAdr),
-		.MemWrite(MemWrite)
+	.clk(clk),
+	.reset(reset),
+	.WriteData(WriteData),
+	.DataAdr(DataAdr),
+	.MemWrite(MemWrite)
 	);
 	initial begin
 		reset <= 1;
@@ -39,7 +41,7 @@ module testbench;
             $finish;
         end
     initial begin
-        $dumpfile("waveform.vcd");
+        $dumpfile("prueba_multi.vcd");
         $dumpvars;
     end
     

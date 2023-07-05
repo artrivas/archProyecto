@@ -3,182 +3,188 @@ module controller (
 	reset,
 	Instr,
 	ALUFlags,
-	PCSrcW,
-	MemWriteM,
-	MemtoRegW,
-	RegWriteW,
-	RegSrcD,
-	ALUSrcE,
-	ImmSrcD,
-	ALUControlE
+	RegSrc,
+	RegWrite,
+	ImmSrc,
+	ALUSrc,
+	ALUControl,
+	MemWrite,
+	MemtoReg,
+	PCSrc
 );
 	input wire clk;
 	input wire reset;
 	input wire [31:12] Instr;
 	input wire [3:0] ALUFlags;
-	output wire PCSrcW;
-	output wire MemWriteM;
-	output wire MemtoRegW
-	output wire RegWriteW;
-	output wire [1:0] RegSrcD;
-	output wire [1:0] ALUSrcE;
-	output wire [1:0] ImmSrcD;
-	output wire [1:0] ALUControlE;
+	output wire [1:0] RegSrc;
+	output wire RegWrite;
+	output wire [1:0] ImmSrc;
+	output wire ALUSrc;
+	output wire [1:0] ALUControl;
+	output wire MemWrite;
+	output wire MemtoReg;
+	output wire PCSrc;
+	
+	//wire PCS;
 
-	wire PCSD;
-	wire RWD;
-	wire mRD;
-	wire mWD;
-	wire [1:0] ALUCD;
-	wire BD;
-	wire [1:0] ALUSD;
-	wire FWD;
-	wire ISD;
-	wire FlagsNext;
+	//Decode
+	wire reg PCSrcD;
+	wire reg RegWriteD;
+	wire reg MemtoRegD;
+	wire reg MemWriteD;
+	wire reg [1:0] ALUControlD;
+	wire reg BranchD;
+	wire reg ALUSrcD;
+	wire reg [1:0] FlagWriteD;
+	wire reg [3:0] CondE;
+	wire reg [3:0] FlagsE;
+	
+	// Execute
+	wire reg PCSrcE;
+	wire reg RegWriteE;
+	wire reg MemtoRegE;
+	wire reg MemWriteE;
+	wire reg BranchE;
+	wire [1:0] FlagWriteE;
 
-	// primer clk
-	wire PCSE;
-	wire RWE;
-	wire mRE;
-	wire mWE;
-	wire BE;
-	wire FWE;
-	wire [3:0] CondE;
-	wire [1:0] FlagsE;
-
-	wire [1:0] FlagW;
-	wire PCS;
-	wire NextPC;
-	wire RegW;
-	wire MemW;
-
-	// bloque de cond logic
-	wire PCSOut;
-	wire RWOut;
-	wire mWOut;
-
-	// segundo bloque de clk
-	wire PCSM;
-	wire RWM;
-	wire mRM;
-
-	// decode
+	//Memory
+	wire reg PCSrcM;
+	wire reg RegWriteM;
+	wire reg MemtoRegM;
 
 	decode dec(
-		.clk(clk),
-		.reset(reset),
 		.Op(Instr[27:26]),
 		.Funct(Instr[25:20]),
 		.Rd(Instr[15:12]),
-		.FlagW(FlagW),
-		.PCS(PCS),
-		.NextPC(NextPC),
-		.RegW(RegW),
-		.MemW(MemW),
-		.IRWrite(IRWrite),
-		.AdrSrc(AdrSrc),
-		.ResultSrc(ResultSrc),
-		.ALUSrcA(ALUSrcA),
-		.ALUSrcB(ALUSrcB),
+		.FlagW(FlagWriteD),
+		.PCS(PCSrcD),
+		.RegW(RegWriteD),
+		.MemW(MemWriteD),
+		.MemtoReg(MemtoRegD),
+		.ALUSrc(ALUSrcD),
 		.ImmSrc(ImmSrc),
 		.RegSrc(RegSrc),
-		.ALUControl(ALUControl)
+		.ALUControl(ALUControlD),
+		.Branch(BranchD)
 	);
 
-	// PRIMER BLOQUE CLK
 
-	blockC1 #(1) #(2) #(4) CLKCondU(
+	//START FIRST BLOCK
+	flopr #(1) alusrce(
 		.clk(clk),
 		.reset(reset),
-		.d0(PCSD),
-		.d1(RWD),
-		.d2(mRD),
-		.d3(mWD),
-		.d4(ALUCD),
-		.d5(BD),
-		.d6(ALUSD),
-		.d7(FWD),
-		.d8(Instr[31:28]),
-		.d9(FlagsNext),
-		.q0(PCSE),
-		.q1(RWE),
-		.q2(mRE),
-		.q3(mWE),
-		.q4(ALUControlE)
-		.q5(BE),
-		.q6(ALUSE),
-		.q7(FWE),
-		.q8(CondE),
-		.q9(FlagsE)
+		.d(ALUSrcD),
+		.q(ALUSrc)
+	); 
+
+	flopr #(1) regwrite(
+		.clk(clk),
+		.reset(reset),
+		.d(RegWriteD),
+		.q(RegWriteE)
 	);
 
-	// bloque de conditional logic
+	flopr #(1) pcsrc(
+		.clk(clk),
+		.reset(reset),
+		.d(PCSrcD),
+		.q(PCSrcE)
+	);
+
+	flopr #(1) memtoreg(
+		.clk(clk),
+		.reset(reset),
+		.d(MemtoRegD),
+		.q(MemtoRegE)
+	);
+
+	flopr #(1) memwrite(
+		.clk(clk),
+		.reset(reset),
+		.d(MemWriteD),
+		.q(MemWriteE)
+	);
+
+	flopr #(2) alucontrol(
+		.clk(clk),
+		.reset(reset),
+		.d(ALUControlD),
+		.q(ALUControl)
+	);
+
+	flopr #(1) branch(
+		.clk(clk),
+		.reset(reset),
+		.d(BranchD),
+		.q(BranchE)
+	);
+
+	flopr #(2) flagwrite(
+		.clk(clk),
+		.reset(reset),
+		.d(FlagWriteD),
+		.q(FlagWriteE)
+	);
+
+	flopr #(4) conde(
+		.clk(clk),
+		.reset(reset),
+		.d(Instr[31:28]),
+		.q(CondE)
+	);
+
+	flopr #(4) flagse(
+		.clk(clk),
+		.reset(reset),
+		.d(ALUFlags),
+		.q(FlagsE)
+	);
+	//END FIRST BLOCK
+
+	//START SECOND BLOCK
+	flopr #(1) memtoregm(
+		.clk(clk),
+		.reset(reset),
+		.d(MemtoRegE),
+		.q(MemtoRegM)
+	);
 
 	condlogic cl(
 		.clk(clk),
 		.reset(reset),
-		.Cond(CondE),
-		.ALUFlags(ALUFlags),
-		.FlagW(FWE),
-		.PCSrcE(PCSE),
-		.RegWE(RWE),
-		.MemWE(mWE),
-		.Branch(BE),
-		.PCSrc(PCSOut),
-		.RegW(RWOut),
-		.MemW(mWOut),
-		.FlagWrite(FlagsNext)
+		.Cond(FlagsE),
+		.ALUFlags(FlagsE),
+		.FlagW(FlagWriteE),
+		.PCS(PCSrcE),
+		.RegW(RegWriteE),
+		.MemW(MemWriteE),
+		.PCSrc(PCSrcM),
+		.RegWrite(RegWriteM),
+		.MemWrite(MemWrite),
+		.Branch(BranchE)
 	);
+	//END SECOND BLOCK
 
-	// SEGUNDO BLOQUE DE CLK
-	floper #(32) PCSrcM(
+	//START THIRD BLOCK
+	flopr #(1) pcsrcw(
 		.clk(clk),
 		.reset(reset),
-		.d(PCSOut),
-		.q(PCSM)
+		.d(PCSrcM),
+		.q(PCSrc)
 	);
 
-	floper #(32) RWriteM(
+	flopr #(1) regwritew(
 		.clk(clk),
 		.reset(reset),
-		.d(RWOut),
-		.q(RWM)
+		.d(RegWriteM),
+		.q(RegWrite)
 	);
 
-	floper #(32) memtoRegM(
+	flopr #(1) memtoregw(
 		.clk(clk),
 		.reset(reset),
-		.d(mRE),
-		.q(mRM)
+		.d(MemtoRegM),
+		.q(MemtoReg)
 	);
-
-	floper #(32) memWriteout(
-		.clk(clk),
-		.reset(reset),
-		.d(mWOut),
-		.q(MemWriteM)
-	);
-
-	// tercer bloque de clk
-	floper #(32) PCSrcOut(
-		.clk(clk),
-		.reset(reset),
-		.d(PCSM),
-		.q(PCSrcW)
-	);
-
-	floper #(32) RegWriteOut(
-		.clk(clk),
-		.reset(reset),
-		.d(RWM),
-		.q(RegWriteW)
-	);
-
-	floper #(32) MemtoRegOut(
-		.clk(clk),
-		.reset(reset),
-		.d(mRM),
-		.q(MemtoRegW)
-	);
-
+	//END THIRD BLOCK
 endmodule
