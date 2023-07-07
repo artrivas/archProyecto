@@ -46,8 +46,27 @@ module condlogic (
 		.Flags(Flags),
 		.CondEx(CondEx)
 	);
+	
 	assign FlagWrite = FlagW & {2 {CondEx}};
-	assign PCSrc = (PCS & CondEx) | (Branch & CondEx);
-	assign RegWrite = (RegW & CondEx);
-	assign MemWrite = (MemW & CondEx);
+
+	flopr #(1) pcsrcwr(
+		.clk(clk),
+		.reset(reset),
+		.d((PCS & CondEx) | (Branch & CondEx)),
+		.q(PCSrc)
+	);
+
+	flopr #(1) regwr(
+		.clk(clk),
+		.reset(reset),
+		.d((RegW & CondEx)),
+		.q(RegWrite)
+	);
+
+	flopr #(1) memwr(
+		.clk(clk),
+		.reset(reset),
+		.d((MemW & CondEx)),
+		.q(MemWrite)
+	);
 endmodule
