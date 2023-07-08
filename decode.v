@@ -1,77 +1,98 @@
-module decode (
+module condlogic (
 	clk,
 	reset,
-	Op,
-	Funct,
-	Rd,
-	PCSrcD,
-	RegWriteD,
-	MemtoRegW,
-	MemWriteD,
-	ALUControlD,
-	BranchD,
-	ALUSrcD,
-	FlagWriteD,
-	ImmSrcD,
-	RegSrcD
+	Cond,
+	ALUFlags,
+	FlagW,
+	FlagsE,
+	PCS,
+	RegW,
+	MemW,
+	PCSrc,
+	RegWrite,
+	MemWrite,
+	Branch,
+	FlagsN
 );
 	input wire clk;
 	input wire reset;
-	input wire [1:0] Op;
-	input wire [5:0] Funct;
-	input wire [3:0] Rd;
-	output wire PCSrcD;
-	output wire RegWriteD;
-	output wire MemtoRegD;
-	output wire MemWriteD;
-	output reg [1:0] ALUControlD;
-	output wire BranchD;
-	output wire [1:0] ALUSrcD;
-	output reg [1:0] FlagWriteD;
-	output wire [1:0] ImmSrcD;
-	output wire [1:0] RegSrcD;
+	input wire [3:0] Cond;
+	input wire [3:0] ALUFlags;
+	input wire [1:0] FlagW;
+	input wire [1:0] FlagsE;
+	input wire PCS;
+	input wire RegW;
+	input wire MemW;
+	input wire Branch;
+	output wire PCSrc;
+	output wire RegWrite;
+	output wire MemWrite;
+	output wire [3:0] FlagsN;
 	
-	wire ALUOp;
-
-	// Main FSM
-	mainfsm fsm(
+	wire [3:0] Flags;
+	
+	wire [3:0] flNt;
+	wire [3:0] flNb;
+	
+	wire [1:0] FlagWrite;
+	wire CondEx;
+	flopenr #(2) flagreg1(
 		.clk(clk),
 		.reset(reset),
-		.Op(Op),
-		.Funct(Funct),
-		.IRWrite(IRWrite),
-		.AdrSrc(AdrSrc),
-		.ALUSrcA(ALUSrcA),
-		.ALUSrcB(ALUSrcB),
-		.ResultSrc(ResultSrc),
-		.NextPC(NextPC),
-		.RegW(RegW),
-		.MemW(MemW),
-		.Branch(Branch),
-		.ALUOp(ALUOp)
-	);doki-theme.theme.wallpaper.Zero Two Dark Obsidian
+		.en(FlagWrite[1]),
+		.d(flNt),
+		.q(Flags[3:2])
+	);
+	flopenr #(2) flagreg0(
+		.clk(clk),
+		.reset(reset),
+		.en(FlagWrite[0]),
+		.d(flNb),
+		.q(Flags[1:0])
+	);
+	
+	mux2 #(4) muxT(
+	   .d0(ALUFlags[3:2]),
+	   .d1(FlagsE),
+	   .s(FlagWrite[1]),
+	   .y(flNt)
+	);
+	
+	mux2 #(4) muxB(
+	   .d0(ALUFlags[1:0]),
+	   .d1(FlagsE),
+	   .s(FlagWrite[0]),
+	   .y(flNb)
+	);
+	
+	assign FlagsN = Flags;
+	
+	condcheck cc(
+		.Cond(Cond),
+		.Flags(Flags),
+		.CondEx(CondEx)
+	);
+	
+	assign FlagWrite = FlagW & {2 {CondEx}};
 
-	// ALU Decoder
-	always @(*)
-		if (ALUOp) begin
-			case (Funct[4:1])
-				4'b0100: ALUControlD = 2'b00;
-				4'b0010: ALUControlD = 2'b01;
-				4'b0000: ALUControlD = 2'b10;
-				4'b1100: ALUControlD = 2'b11;
-				default: ALUControlD = 2'bxx;
-			endcase
-			FlagWD[1] = Funct[0];
-			FlagWD[0] = Funct[0] & ((ALUControlD == 2'b00) | (ALUControlD == 2'b01));
-		end
-		else begin
-			ALUControlD = 2'b00;
-			FlagWD = 2'b00;
-		end
-	assign PCSD = ((Rd == 4'b1111) & RegW) | BranchD;
+	flopr #(1) pcsrcwr(
+		.clk(clk),
+		.reset(reset),
+		.d((PCS & CondEx) | (Branch & CondEx)),
+		.q(PCSrc)
+	);
 
-	// Instruction decoder for ImmSrc and RegSrc
-	assign ImmSrcD = Op;
-	assign RegSrcD[0] = Op == 2'b10;
-	assign RegSrcD[1] = Op == 2'b01;
+	flopr #(1) regwr(
+		.clk(clk),
+		.reset(reset),
+		.d((RegW & CondEx)),
+		.q(RegWrite)
+	);
+
+	flopr #(1) memwr(
+		.clk(clk),
+		.reset(reset),
+		.d((MemW & CondEx)),
+		.q(MemWrite)
+	);
 endmodule
