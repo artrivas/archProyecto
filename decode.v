@@ -1,98 +1,64 @@
-module condlogic (
-	clk,
-	reset,
-	Cond,
-	ALUFlags,
+module decode (
+	Op,
+	Funct,
+	Rd,
 	FlagW,
-	FlagsE,
 	PCS,
 	RegW,
 	MemW,
-	PCSrc,
-	RegWrite,
-	MemWrite,
-	Branch,
-	FlagsN
+	MemtoReg,
+	ALUSrc,
+	ImmSrc,
+	RegSrc,
+	ALUControl,
+	Branch
 );
-	input wire clk;
-	input wire reset;
-	input wire [3:0] Cond;
-	input wire [3:0] ALUFlags;
-	input wire [1:0] FlagW;
-	input wire [1:0] FlagsE;
-	input wire PCS;
-	input wire RegW;
-	input wire MemW;
-	input wire Branch;
-	output wire PCSrc;
-	output wire RegWrite;
-	output wire MemWrite;
-	output wire [3:0] FlagsN;
-	
-	wire [3:0] Flags;
-	
-	wire [3:0] flNt;
-	wire [3:0] flNb;
-	
-	wire [1:0] FlagWrite;
-	wire CondEx;
-	flopenr #(2) flagreg1(
-		.clk(clk),
-		.reset(reset),
-		.en(FlagWrite[1]),
-		.d(flNt),
-		.q(Flags[3:2])
-	);
-	flopenr #(2) flagreg0(
-		.clk(clk),
-		.reset(reset),
-		.en(FlagWrite[0]),
-		.d(flNb),
-		.q(Flags[1:0])
-	);
-	
-	mux2 #(4) muxT(
-	   .d0(ALUFlags[3:2]),
-	   .d1(FlagsE),
-	   .s(FlagWrite[1]),
-	   .y(flNt)
-	);
-	
-	mux2 #(4) muxB(
-	   .d0(ALUFlags[1:0]),
-	   .d1(FlagsE),
-	   .s(FlagWrite[0]),
-	   .y(flNb)
-	);
-	
-	assign FlagsN = Flags;
-	
-	condcheck cc(
-		.Cond(Cond),
-		.Flags(Flags),
-		.CondEx(CondEx)
-	);
-	
-	assign FlagWrite = FlagW & {2 {CondEx}};
-
-	flopr #(1) pcsrcwr(
-		.clk(clk),
-		.reset(reset),
-		.d((PCS & CondEx) | (Branch & CondEx)),
-		.q(PCSrc)
-	);
-
-	flopr #(1) regwr(
-		.clk(clk),
-		.reset(reset),
-		.d((RegW & CondEx)),
-		.q(RegWrite)
-	);
-
-	flopr #(1) memwr(
-		.clk(clk),
-		.reset(reset),
-		.d((MemW & CondEx)),
-		.q(MemWrite)
-	);
+	input wire [1:0] Op;
+	input wire [5:0] Funct;
+	input wire [3:0] Rd;
+	output reg [1:0] FlagW;
+	output wire PCS;
+	output wire RegW;
+	output wire MemW;
+	output wire MemtoReg;
+	output wire ALUSrc;
+	output wire [1:0] ImmSrc;
+	output wire [1:0] RegSrc;
+	output reg [1:0] ALUControl;
+	reg [9:0] controls;
+	output wire Branch;
+	wire ALUOp;
+	always @(*)
+		casex (Op)
+			2'b00:
+				if (Funct[5])
+					controls = 10'b0000101001;
+				else
+					controls = 10'b0000001001;
+			2'b01:
+				if (Funct[0])
+					controls = 10'b0001111000;
+				else
+					controls = 10'b1001110100;
+			2'b10: controls = 10'b0110100010;
+			default: controls = 10'bxxxxxxxxxx;
+		endcase
+	assign {RegSrc, ImmSrc, ALUSrc, MemtoReg, RegW, MemW, Branch, ALUOp} = controls;
+	always @(*)
+		if (ALUOp) begin
+			case (Funct[4:1])
+				4'b0100: ALUControl = 2'b00;
+				4'b0010: ALUControl = 2'b01;
+				4'b0000: ALUControl = 2'b10;
+				4'b1100: ALUControl = 2'b11;
+				default: ALUControl = 2'bxx;
+			endcase
+			FlagW[1] = Funct[0];
+			FlagW[0] = Funct[0] & ((ALUControl == 2'b00) | (ALUControl == 2'b01));
+		end
+		else begin
+			ALUControl = 2'b00;
+			FlagW = 2'b00;
+		end
+	assign PCS = ((Rd == 4'b1111) & RegW) | Branch;
 endmodule
