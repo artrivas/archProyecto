@@ -18,13 +18,13 @@ module arm (
 	input wire [31:0] ReadData;
 
 	wire [3:0] ALUFlags;
-	output wire PCSrc; //Changed
-	output wire MemtoReg; //Changed
-	output wire RegWrite; //Changed
-	output wire ALUSrc; //Changed
-	output wire [1:0] RegSrc; //Changed
-	output wire [1:0] ImmSrc;// Changed
-	output wire [1:0] ALUControl;//Changed
+	wire PCSrc; //Changed
+	wire MemtoReg; //Changed
+	wire RegWrite; //Changed
+	wire ALUSrc; //Changed
+	wire [1:0] RegSrc; //Changed
+	wire [1:0] ImmSrc;// Changed
+	wire [1:0] ALUControl;//Changed
 
 	datapath dp(
 		.clk(clk),
@@ -42,5 +42,19 @@ module arm (
 		.ALUResultM(ALUResult),
 		.WriteDataM(WriteData),
 		.ReadDataM(ReadData)
+	);
+	
+	controller control(
+	   .clk(clk),
+	   .reset(reset),
+	   .Instr(Instr),
+	   .ALUFlags(ALUFlags),
+	   .RegSrc(RegSrc),
+	   .ImmSrc(ImmSrc),
+	   .ALUSrc(ALUSrc),
+	   .ALUControl(ALUControl),
+	   .MemWrite(MemWrite),
+	   .MemtoReg(MemtoReg),
+	   .PCSrc(PCSrc)
 	);
 endmodule
