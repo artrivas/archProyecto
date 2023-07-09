@@ -11,6 +11,7 @@ PCSrcW,
 ALUFlags,
 PCF,
 InstrF,
+InstrD,
 ALUOutM,
 WriteDataM,
 ReadDataM
@@ -40,7 +41,7 @@ wire [31:0] SrcAE;
 wire [31:0] ResultW;
 wire [3:0] RA1;
 wire [3:0] RA2;
-wire [31:0] InstrD;
+output wire [31:0] InstrD;
 wire [31:0] WriteDataD;
 wire [31:0] WriteDataE;
 wire [31:0] SrcAD;
