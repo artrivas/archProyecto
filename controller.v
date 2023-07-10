@@ -9,8 +9,10 @@ module controller (
 	ALUSrcE,
 	ALUControlE,
 	MemWriteM,
+	MemtoRegE,
 	MemtoRegW,
-	PCSrcW
+	PCSrcW,
+	RegWriteM
 );
 	input wire clk;
 	input wire reset;
@@ -18,6 +20,8 @@ module controller (
 	input wire [3:0] ALUFlags;
 	
 	//wire PCS;
+
+
 
 	//Decode
 	wire PCSD;
@@ -35,7 +39,7 @@ module controller (
 	// Execute
 	wire PCSE;
 	wire RegWriteE;
-	wire MemtoRegE;
+	output wire MemtoRegE;
 	wire MemWriteE;
 	output wire [1:0] ALUControlE; //Changed
 	wire BranchE;
@@ -50,7 +54,7 @@ module controller (
 	
 	//Memory
 	wire PCSrcM;
-	wire RegWriteM; //Changed
+	output wire RegWriteM; //Changed
 	wire MemtoRegM;
 	output wire MemWriteM; //Changed
 
