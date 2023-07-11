@@ -12,7 +12,10 @@ module controller (
 	MemtoRegE,
 	MemtoRegW,
 	PCSrcW,
-	RegWriteM
+	RegWriteM,
+	BranchTakenE,
+	PCWrPendingF,
+	FlushE
 );
 	input wire clk;
 	input wire reset;
@@ -34,7 +37,6 @@ module controller (
 	wire [1:0] FlagWriteD;
 	output wire [1:0] ImmSrcD; //Changed
 	output wire [1:0] RegSrcD; // Changed
-
 	
 	// Execute
 	wire PCSE;
@@ -63,6 +65,10 @@ module controller (
 	output wire RegWriteW;
 	output wire MemtoRegW; //Changed
 
+	// para el hazard
+	input wire FlushE;
+	output wire BranchTakenE;
+	output wire PCWrPendingF;
 
 	decode dec(
 		.Op(Instr[27:26]),
@@ -84,72 +90,82 @@ module controller (
 
 	//START FIRST BLOCK
 
-	flopr #(1) ModPCSE(
+	flopenr #(1) ModPCSE(
 		.clk(clk),
 		.reset(reset),
+		.en(~FlushE),
 		.d(PCSD),
 		.q(PCSE)
 	);
 
-	flopr #(1) ModRegWriteE(
+	flopenr #(1) ModRegWriteE(
 		.clk(clk),
 		.reset(reset),
+		.en(~FlushE),
 		.d(RegWriteD),
 		.q(RegWriteE)
 	);
 
-	flopr #(1) ModMemtoRegE(
+	flopenr #(1) ModMemtoRegE(
 		.clk(clk),
 		.reset(reset),
+		.en(~FlushE),
 		.d(MemtoRegD),
 		.q(MemtoRegE)
 	);
 
-	flopr #(1) ModMemWriteE(
+	flopenr #(1) ModMemWriteE(
 		.clk(clk),
 		.reset(reset),
+		.en(~FlushE),
 		.d(MemWriteD),
 		.q(MemWriteE)
 	);
 
-	flopr #(2) ModAluControlE(
+	flopenr #(2) ModAluControlE(
 		.clk(clk),
 		.reset(reset),
+		.en(~FlushE),
 		.d(ALUControlD),
 		.q(ALUControlE)
 	);
 
-	flopr #(1) ModBranchE(
+	flopenr #(1) ModBranchE(
 		.clk(clk),
 		.reset(reset),
+		.en(~FlushE),
 		.d(BranchD),
 		.q(BranchE)
 	);
 
-	flopr #(1) ModAluSrcE(
+	flopenr #(1) ModAluSrcE(
 		.clk(clk),
 		.reset(reset),
+		.en(~FlushE),
 		.d(ALUSrcD),
 		.q(ALUSrcE)
 	); 
 
-	flopr #(2) ModFlagWriteE(
+	flopenr #(2) ModFlagWriteE(
 		.clk(clk),
 		.reset(reset),
+		.en(~FlushE),
 		.d(FlagWriteD),
 		.q(FlagWriteE)
 	);
 
-	flopr #(4) ModCondE(
+	flopenr #(4) ModCondE(
 		.clk(clk),
 		.reset(reset),
+		.en(~FlushE),
 		.d(Instr[31:28]),
 		.q(CondE)
 	);
 
-	flopr #(4) ModFlagsE(
+	flopenr #(4) ModFlagsE(
 		.clk(clk),
 		.reset(reset),
+		.en(~FlushE),
 		.d(ALUFlagsResult),
 		.q(FlagsE)
 	);
@@ -170,8 +186,8 @@ module controller (
 		.ALUFlagsResult(ALUFlagsResult),
 		.PCSrc(PCSrcE),
 		.RegWrite(RegWriteBM),
-		.MemWrite(MemWriteBM)
-		
+		.MemWrite(MemWriteBM),
+		.BranchTakenE(BranchTakenE)
 	);
 
 	//START SECOND BLOCK
@@ -228,4 +244,9 @@ module controller (
 		.q(MemtoRegW)
 	);
 	//END THIRD BLOCK
+
+	// Salidas para el bloque de Hazard
+	assign PCWrPendingF = PCSD + PCSE + PCSrcM;
+
+
 endmodule

@@ -34,7 +34,9 @@ module testbench;
 				$finish;
 			end
 		end
-        
+    always begin
+	  #(500) $finish;
+	end    
     initial begin
         $dumpfile("waveform.vcd");
         $dumpvars;

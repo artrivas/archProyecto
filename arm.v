@@ -23,7 +23,7 @@ module arm (
 	wire ALUSrc;
 	wire MemtoRegW;
 	wire MemtoRegE;
-	wire PCSrc;
+	wire PCSrcW;
 	wire [1:0] RegSrc;
 	wire [1:0] ImmSrc;
 	wire [1:0] ALUControl;
@@ -37,6 +37,9 @@ module arm (
 	wire StallD;
 	wire StallF;
 	wire FlushE;
+	wire FlushD;
+	wire BranchTakenE;
+	wire PCWrPendingF;
 
 	controller c(
 		.clk(clk),
@@ -51,8 +54,11 @@ module arm (
 		.MemWriteM(MemWrite),
 		.MemtoRegE(MemtoRegE),
 		.MemtoRegW(MemtoRegW),
-		.PCSrcW(PCSrc),
-		.RegWriteM(RegWriteM)
+		.PCSrcW(PCSrcW),
+		.RegWriteM(RegWriteM),
+		.BranchTakenE(BranchTakenE),
+		.PCWrPendingF(PCWrPendingF),
+		.FlushE(FlushE)
 	);
 	datapath dp(
 		.clk(clk),
@@ -62,8 +68,8 @@ module arm (
 		.ImmSrcD(ImmSrc),
 		.ALUSrcE(ALUSrc),
 		.ALUControlE(ALUControl),
-		.MemtoRegW(MemtoReg),
-		.PCSrcW(PCSrc),
+		.MemtoRegW(MemtoRegW),
+		.PCSrcW(PCSrcW),
 		.ALUFlags(ALUFlags),
 		.PCF(PC),
 		.InstrF(Instr),
@@ -80,7 +86,9 @@ module arm (
 		.ForwardBE(ForwardBE),
 		.StallD(StallD),
 		.StallF(StallF),
-		.FlushE(FlushE)
+		.FlushE(FlushE),
+		.FlushD(FlushD),
+		.BranchTakenE(BranchTakenE)
 	);
 
 	hazardUnit hU(
@@ -92,11 +100,15 @@ module arm (
 		.RegWriteM(RegWriteM),
 		.RegWriteW(RegWriteW),
 		.MemtoRegE(MemtoRegE),
+		.PCWrPendingF(PCWrPendingF),
+		.BranchTakenE(BranchTakenE),
+		.PCSrcW(PCSrcW),
 		.ForwardAE(ForwardAE),
 		.ForwardBE(ForwardBE),
 		.StallF(StallF),
 		.StallD(StallD),
-		.FlushE(FlushE)
+		.FlushE(FlushE),
+		.FlushD(FlushD)
 	);
 
 endmodule

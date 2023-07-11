@@ -12,7 +12,8 @@ module condunit (
 	Branch,
 	PCSrc,
 	RegWrite,
-	MemWrite
+	MemWrite,
+	BranchTakenE
 );
 	input wire clk;
 	input wire reset;
@@ -29,7 +30,7 @@ module condunit (
 	output wire PCSrc;
 	output wire RegWrite;
 	output wire MemWrite;
-
+	output wire BranchTakenE;
 	wire CondEx;
 	wire FlagWrite;
 	
@@ -55,7 +56,8 @@ module condunit (
 		.y(ALUFlagsResult[1:0])
 	);
 
-	assign PCSrc = (PCS & CondEx) | (Branch & CondEx);
+	assign PCSrc = PCS & CondEx;
+	assign BranchTakenE = Branch & CondEx;
 	assign RegWrite = RegW & CondEx;
 	assign MemWrite = MemW & CondEx;
 

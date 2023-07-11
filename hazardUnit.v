@@ -7,21 +7,33 @@ module hazardUnit(
     RegWriteM,
     RegWriteW,
 	MemtoRegE,
+    PCWrPendingF,
+    BranchTakenE,
+    PCSrcW,
     ForwardAE,
     ForwardBE,
     StallF,
     StallD,
-    FlushE
+    FlushE,
+    FlushD
 );
+// entradas del control
 input wire RegWriteM; // 1 bit
 input wire RegWriteW; // 1 bit
 input wire MemtoRegE;
+input wire PCWrPendingF;
+input wire BranchTakenE;
+input wire PCSrcW;
+
+// salidas del hazard
 output reg [1:0] ForwardAE;
 output reg [1:0] ForwardBE;
 output wire StallD;
 output wire StallF;
 output wire FlushE;
+output wire FlushD;
 
+// entradas del datapath
 input wire Match_1E_M; // 1 bit
 input wire Match_1E_W; // 1 bit
 input wire Match_2E_M; // 1 bit
@@ -54,8 +66,10 @@ always @(*) begin
 end
 
 assign LDRstall = Match_12D_E*MemtoRegE;
-assign StallF = LDRstall; // 1 bit
+
+assign StallF = LDRstall + PCWrPendingF; // 1 bit
 assign StallD = LDRstall; // 1 bit
-assign FlushE = LDRstall; // 1 bit
+assign FlushE = LDRstall + BranchTakenE; // 1 bit
+assign FlushD = PCWrPendingF + PCSrcW + BranchTakenE; // 1 bit
 
 endmodule
