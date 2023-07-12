@@ -25,21 +25,22 @@ module testbench;
 		#(5)
 			;
 	end
+
+    
     
 	always @(negedge clk)
 		if (MemWrite)
-		begin
-			if (WriteData === 7) begin
+			if ((DataAdr === 100) & (WriteData === 7)) begin
 				$display("Simulation succeeded123");
 				$finish;
 			end
-		end
-    always begin
-	  #(500) $finish;
-	end    
+        else if (DataAdr !== 96) begin
+            $display("Simulation failed");
+            $finish;
+        end
     initial begin
         $dumpfile("waveform.vcd");
         $dumpvars;
     end
-    
+
 endmodule

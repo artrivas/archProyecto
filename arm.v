@@ -64,7 +64,7 @@ module arm (
 		.clk(clk),
 		.reset(reset),
 		.RegSrcD(RegSrc),
-		.RegWriteW(RegWrite),
+		.RegWriteW(RegWriteW),
 		.ImmSrcD(ImmSrc),
 		.ALUSrcE(ALUSrc),
 		.ALUControlE(ALUControl),

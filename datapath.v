@@ -154,34 +154,34 @@ regfile rf(
 .rd2(WriteDataD)
 );
 
-flopenr #(32) RegRD1(
+floperFlush #(32) RegRD1(
 .clk(clk),
 .reset(reset),
-.en(~FlushE),
+.en(FlushE),
 .d(SrcAD),
 .q(RD1E)
 );
 
-flopenr #(32) RegRD2(
+floperFlush #(32) RegRD2(
 .clk(clk),
 .reset(reset),
-.en(~FlushE),
+.en(FlushE),
 .d(WriteDataD),
 .q(RD2E)
 );
 
-flopenr #(4) RegWA3E(
+floperFlush #(4) RegWA3E(
 .clk(clk),
 .reset(reset),
-.en(~FlushE),
+.en(FlushE),
 .d(InstrD[15:12]),
 .q(WA3E)
 );
 
-flopenr #(32) RegExtend(
+floperFlush #(32) RegExtend(
 .clk(clk),
 .reset(reset),
-.en(~FlushE),
+.en(FlushE),
 .d(ExtImmD),
 .q(ExtImmE)
 );

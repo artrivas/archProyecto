@@ -1,21 +1,19 @@
-module flopenrDouble (
+module floperFlush (
 	clk,
 	reset,
-	en0,
-    en1,
+	en,
 	d,
 	q
 );
 	parameter WIDTH = 8;
 	input wire clk;
 	input wire reset;
-	input wire en0;
-	input wire en1;
+	input wire en;
 	input wire [WIDTH - 1:0] d;
 	output reg [WIDTH - 1:0] q;
 	always @(posedge clk or posedge reset)
-		if (reset || en1)
+		if (reset | en)
 			q <= 0;
-		else if (en0)
+		else
 			q <= d;
 endmodule

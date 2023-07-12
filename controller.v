@@ -90,82 +90,82 @@ module controller (
 
 	//START FIRST BLOCK
 
-	flopenr #(1) ModPCSE(
+	floperFlush #(1) ModPCSE(
 		.clk(clk),
 		.reset(reset),
-		.en(~FlushE),
+		.en(FlushE),
 		.d(PCSD),
 		.q(PCSE)
 	);
 
-	flopenr #(1) ModRegWriteE(
+	floperFlush #(1) ModRegWriteE(
 		.clk(clk),
 		.reset(reset),
-		.en(~FlushE),
+		.en(FlushE),
 		.d(RegWriteD),
 		.q(RegWriteE)
 	);
 
-	flopenr #(1) ModMemtoRegE(
+	floperFlush #(1) ModMemtoRegE(
 		.clk(clk),
 		.reset(reset),
-		.en(~FlushE),
+		.en(FlushE),
 		.d(MemtoRegD),
 		.q(MemtoRegE)
 	);
 
-	flopenr #(1) ModMemWriteE(
+	floperFlush #(1) ModMemWriteE(
 		.clk(clk),
 		.reset(reset),
-		.en(~FlushE),
+		.en(FlushE),
 		.d(MemWriteD),
 		.q(MemWriteE)
 	);
 
-	flopenr #(2) ModAluControlE(
+	floperFlush #(2) ModAluControlE(
 		.clk(clk),
 		.reset(reset),
-		.en(~FlushE),
+		.en(FlushE),
 		.d(ALUControlD),
 		.q(ALUControlE)
 	);
 
-	flopenr #(1) ModBranchE(
+	floperFlush #(1) ModBranchE(
 		.clk(clk),
 		.reset(reset),
-		.en(~FlushE),
+		.en(FlushE),
 		.d(BranchD),
 		.q(BranchE)
 	);
 
-	flopenr #(1) ModAluSrcE(
+	floperFlush #(1) ModAluSrcE(
 		.clk(clk),
 		.reset(reset),
-		.en(~FlushE),
+		.en(FlushE),
 		.d(ALUSrcD),
 		.q(ALUSrcE)
 	); 
 
-	flopenr #(2) ModFlagWriteE(
+	floperFlush #(2) ModFlagWriteE(
 		.clk(clk),
 		.reset(reset),
-		.en(~FlushE),
+		.en(FlushE),
 		.d(FlagWriteD),
 		.q(FlagWriteE)
 	);
 
-	flopenr #(4) ModCondE(
+	floperFlush #(4) ModCondE(
 		.clk(clk),
 		.reset(reset),
-		.en(~FlushE),
+		.en(FlushE),
 		.d(Instr[31:28]),
 		.q(CondE)
 	);
 
-	flopenr #(4) ModFlagsE(
+	floperFlush #(4) ModFlagsE(
 		.clk(clk),
 		.reset(reset),
-		.en(~FlushE),
+		.en(FlushE),
 		.d(ALUFlagsResult),
 		.q(FlagsE)
 	);
